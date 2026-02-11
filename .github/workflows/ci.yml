@@ -14,16 +14,13 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        working-directory: devops-webapp
         run: npm install
 
-      - name: Build React project
-        working-directory: devops-webapp
+      - name: Build project
         run: npm run build
 
-      # ✅ Check if index.html exists after build
+      # if you expect build/index.html
       - name: Verify build output
-        working-directory: devops-webapp
         run: |
           if [ -f build/index.html ]; then
             echo "index.html found ✅"
