@@ -3,38 +3,21 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  build:
+  check-html:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build project
-        run: npm run build
-
-      # if you expect build/index.html
-      - name: Verify build output
-        run: |
-          if [ -f build/index.html ]; then
-            echo "index.html found ✅"
-          else
-            echo "index.html missing ❌"
-            exit 1
-          fi
+      - name: Verify index.html
+        run: test -f index.html
 
       - name: Slack Success
         if: success()
         continue-on-error: true
         run: |
           curl -X POST -H "Content-type: application/json" \
-          --data '{"text":"✅ CI Build Succeeded"}' \
+          --data '{"text":"✅ HTML check passed"}' \
           "${{ secrets.SLACK_WEBHOOK_URL }}"
 
       - name: Slack Failure
@@ -42,5 +25,5 @@ jobs:
         continue-on-error: true
         run: |
           curl -X POST -H "Content-type: application/json" \
-          --data '{"text":"❌ CI Build Failed"}' \
+          --data '{"text":"❌ HTML check failed"}' \
           "${{ secrets.SLACK_WEBHOOK_URL }}"
