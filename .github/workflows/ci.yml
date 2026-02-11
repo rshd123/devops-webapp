@@ -1,0 +1,47 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Slack Force Test
+        continue-on-error: true
+        run: |
+          curl -v -X POST -H "Content-type: application/json" \
+          --data '{"text":"🧪 Slack force test from GitHub Actions"}' \
+          "${{ secrets.SLACK_WEBHOOK_URL }}"
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          cd my-app
+          npm install
+
+      - name: Build project
+        run: |
+          cd my-app
+          npm run build
+
+      - name: Slack Success
+        if: success()
+        continue-on-error: true
+        run: |
+          curl -X POST -H "Content-type: application/json" \
+          --data '{"text":"✅ CI Build Succeeded"}' \
+          "${{ secrets.SLACK_WEBHOOK_URL }}"
+
+      - name: Slack Failure
+        if: failure()
+        continue-on-error: true
+        run: |
+          curl -X POST -H "Content-type: application/json" \
+          --data '{"text":"❌ CI Build Failed"}' \
+          "${{ secrets.SLACK_WEBHOOK_URL }}"
